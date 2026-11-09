@@ -1,0 +1,2663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Apostolic Church — Congregation Suite</title>
+<style>
+  :root {
+    --nac-blue: #1e5aa8;
+    --nac-dark: #0d3a6e;
+    --nac-light: #e8f1fb;
+    --accent: #c53030;
+    --success: #276749;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --border: #cbd5e0;
+    --text: #1a202c;
+    --muted: #718096;
+    --shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* LOGIN */
+  #loginScreen {
+    position: fixed; inset: 0;
+    background: linear-gradient(160deg, var(--nac-dark) 0%, var(--nac-blue) 60%, #3b82f6 100%);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999;
+  }
+  #loginScreen.hidden { display: none; }
+  .login-box {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    width: 100%; max-width: 380px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    text-align: center;
+  }
+  .login-box img {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    object-fit: cover;
+  }
+  .login-box h1 {
+    font-size: 1.35rem;
+    color: var(--nac-dark);
+    margin-bottom: 0.25rem;
+  }
+  .login-box p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+  .login-box input {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+  .login-box input:focus {
+    outline: none;
+    border-color: var(--nac-blue);
+  }
+  .login-box button {
+    width: 100%;
+    padding: 0.9rem;
+    background: var(--nac-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .login-box button:hover { background: var(--nac-dark); }
+  .login-error {
+    color: var(--accent);
+    font-size: 0.85rem;
+    margin-top: 0.75rem;
+    display: none;
+  }
+
+  /* APP */
+  #app { display: none; }
+  #app.visible { display: block; }
+
+  header {
+    background: linear-gradient(135deg, var(--nac-dark) 0%, var(--nac-blue) 100%);
+    color: white;
+    padding: 0.85rem 1.25rem;
+    box-shadow: var(--shadow);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-content {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 0.65rem;
+    font-size: 1.15rem; font-weight: 700;
+  }
+  .logo img {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: white;
+    padding: 2px;
+    object-fit: cover;
+  }
+  nav { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+  .nav-btn {
+    background: rgba(255,255,255,0.12);
+    border: none; color: white;
+    padding: 0.45rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem; font-weight: 500;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover, .nav-btn.active {
+    background: white; color: var(--nac-dark);
+  }
+  .logout-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: white;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  .logout-btn:hover { background: rgba(255,255,255,0.2); }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.25rem;
+  }
+  .panel { display: none; animation: fadeIn 0.25s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .card h2 {
+    font-size: 1.25rem;
+    color: var(--nac-dark);
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 700px) {
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  input, select, textarea {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    font-size: 0.95rem;
+    background: #fff;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--nac-blue);
+    box-shadow: 0 0 0 3px rgba(30,90,168,0.12);
+  }
+  textarea { resize: vertical; min-height: 70px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.65rem 1.2rem;
+    border: none; border-radius: 7px;
+    font-size: 0.9rem; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--nac-blue); color: white; }
+  .btn-primary:hover { background: var(--nac-dark); }
+  .btn-success { background: var(--success); color: white; }
+  .btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--nac-blue);
+    color: var(--nac-blue);
+  }
+  .btn-outline:hover { background: var(--nac-light); }
+  .btn-row { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1.25rem; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  th, td {
+    padding: 0.65rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: var(--nac-light);
+    color: var(--nac-dark);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+  }
+  tr:hover td { background: #f8fafc; }
+  .actions { display: flex; gap: 0.35rem; }
+  .actions button {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-sm-view { background: #ebf8ff; color: #2b6cb0; }
+  .btn-sm-del { background: #fff5f5; color: #c53030; }
+
+  .toast {
+    position: fixed; bottom: 1.5rem; right: 1.5rem;
+    background: var(--nac-dark); color: white;
+    padding: 0.85rem 1.25rem;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    z-index: 1000;
+    opacity: 0; transform: translateY(20px);
+    transition: all 0.3s;
+  }
+  .toast.show { opacity: 1; transform: none; }
+
+  /* NAC FORM */
+  .nac-form-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--nac-blue);
+  }
+  .nac-form-header img {
+    width: 56px; height: 56px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  .nac-form-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: var(--nac-dark);
+  }
+  .nac-form-header span {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  .field-row label {
+    margin: 0;
+    font-size: 0.85rem;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text);
+    font-weight: 500;
+  }
+  @media (max-width: 500px) {
+    .field-row { grid-template-columns: 1fr; gap: 0.2rem; }
+  }
+  .officiant-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .officiant-list input { max-width: 320px; }
+
+  .receipt-preview {
+    background: #fffef8;
+    border: 1px solid #d4c9a8;
+    border-radius: 4px;
+    padding: 1.5rem;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    max-width: 420px;
+    margin: 1rem auto 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .receipt-preview .r-header {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  .receipt-preview .r-header img {
+    width: 48px; height: 48px;
+    margin-bottom: 0.3rem;
+    object-fit: cover;
+  }
+  .receipt-preview .r-header h3 {
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    color: var(--nac-dark);
+  }
+  .receipt-preview .r-line {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dotted #ccc;
+    padding: 0.25rem 0;
+  }
+  .receipt-preview .r-label { font-weight: 600; }
+  .receipt-preview .r-value { font-weight: 400; }
+  .receipt-preview .r-red { color: #c53030; font-weight: 700; font-size: 1.05rem; }
+
+  .preview-area {
+    background: #f8fafc;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    text-align: center;
+  }
+  .cert-preview, .id-preview {
+    display: inline-block;
+    background: white;
+    border: 2px solid var(--nac-blue);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: left;
+    max-width: 100%;
+  }
+  .cert-preview {
+    width: 540px;
+    font-family: 'Times New Roman', Times, Georgia, serif;
+    color: #1a202c;
+    line-height: 1.35;
+  }
+  .id-preview {
+    width: 340px;
+    background: linear-gradient(145deg, #f0f7ff 0%, #fff 100%);
+  }
+  .cert-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+  }
+  .cert-header img {
+    width: 42px;
+    height: 42px;
+    border-radius: 4px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  .cert-header .church-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1a365d;
+    letter-spacing: 0.01em;
+  }
+  .cert-title {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0.7rem 0 0.35rem;
+    color: #1a202c;
+  }
+  .cert-subtitle {
+    text-align: center;
+    font-style: italic;
+    font-size: 0.95rem;
+    margin-bottom: 0.85rem;
+    color: #4a5568;
+  }
+  .cert-name {
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0.4rem 0 0.85rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px dotted #718096;
+    min-height: 1.6em;
+  }
+  .cert-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.8rem;
+    margin: 0.75rem 0;
+  }
+  .cert-col { flex: 1; }
+  .cert-label {
+    font-size: 0.7rem;
+    color: #718096;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.12rem;
+  }
+  .cert-value {
+    font-size: 0.95rem;
+    border-bottom: 1px dotted #a0aec0;
+    min-height: 1.35em;
+    padding-bottom: 0.12rem;
+  }
+  .cert-section {
+    text-align: center;
+    margin: 0.9rem 0 0.4rem;
+    font-size: 0.95rem;
+  }
+  .cert-dates {
+    display: flex;
+    justify-content: center;
+    gap: 2.8rem;
+    margin: 0.35rem 0 0.9rem;
+  }
+  .cert-date-block {
+    text-align: center;
+    min-width: 130px;
+  }
+  .cert-date-block .cert-value {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+  .cert-cong-label {
+    text-align: center;
+    font-size: 0.95rem;
+    margin: 0.7rem 0 0.25rem;
+  }
+  .cert-cong-name {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border-bottom: 1px dotted #718096;
+    padding-bottom: 0.25rem;
+    margin: 0 auto 1.1rem;
+    max-width: 78%;
+    min-height: 1.5em;
+  }
+  .cert-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 1.4rem;
+    padding-top: 0.4rem;
+  }
+  .cert-no {
+    font-size: 0.85rem;
+  }
+  .cert-no span {
+    color: #c53030;
+    font-weight: 700;
+  }
+  .cert-sig {
+    text-align: center;
+    min-width: 150px;
+  }
+  .cert-sig-name {
+    font-style: italic;
+    font-size: 0.95rem;
+    min-height: 1.3em;
+  }
+  .cert-sig-line {
+    border-top: 1px solid #4a5568;
+    margin-top: 1.8rem;
+    padding-top: 0.25rem;
+    font-size: 0.78rem;
+    color: #4a5568;
+  }
+
+
+  /* Modern Membership ID Card */
+  .id-card-modern {
+    width: 520px;
+    max-width: 100%;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    position: relative;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    border: 1px solid #e2e8f0;
+  }
+  .idc-header {
+    background: linear-gradient(135deg, #1e5aa8 0%, #2563eb 100%);
+    color: white;
+    padding: 0.85rem 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .idc-logo-wrap img {
+    width: 38px;
+    height: 38px;
+    border-radius: 6px;
+    background: white;
+    padding: 2px;
+  }
+  .idc-church {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    line-height: 1.2;
+  }
+  .idc-subtitle {
+    font-size: 0.72rem;
+    opacity: 0.9;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .idc-body {
+    display: flex;
+    gap: 1.25rem;
+    padding: 1.15rem 1.15rem 0.9rem;
+    position: relative;
+    z-index: 2;
+  }
+  .idc-photo {
+    width: 110px;
+    height: 130px;
+    border-radius: 10px;
+    border: 3px solid #93c5fd;
+    background: #f1f5f9;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .idc-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .idc-no-photo {
+    font-size: 0.75rem;
+    color: #94a3b8;
+  }
+  .idc-info-col {
+    flex: 1;
+    position: relative;
+  }
+  .idc-role {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #0f766e;
+    color: white;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.22rem 0.6rem;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+  }
+  .idc-label {
+    font-size: 0.65rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.45rem;
+    margin-bottom: 0.05rem;
+  }
+  .idc-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1e3a5f;
+    line-height: 1.25;
+  }
+  .idc-name {
+    font-size: 1.2rem;
+    color: #1e40af;
+  }
+  .idc-memno {
+    color: #2563eb;
+    font-family: ui-monospace, monospace;
+    letter-spacing: 0.03em;
+  }
+  .idc-footer {
+    background: #f0f7ff;
+    border-top: 1px solid #dbeafe;
+    padding: 0.7rem 1.15rem 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 0.75rem;
+    font-size: 0.72rem;
+    color: #475569;
+    position: relative;
+    z-index: 2;
+  }
+  .idc-dates div { line-height: 1.4; }
+  .idc-sig-block {
+    text-align: center;
+    min-width: 120px;
+  }
+  .idc-sig-name {
+    font-family: 'Segoe Script', 'Brush Script MT', cursive;
+    font-size: 0.95rem;
+    color: #1e3a5f;
+    min-height: 1.2em;
+  }
+  .idc-sig-line {
+    border-top: 1px solid #64748b;
+    margin-top: 0.15rem;
+    padding-top: 0.15rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    color: #64748b;
+  }
+  .idc-motto {
+    font-style: italic;
+    font-size: 0.7rem;
+    color: #64748b;
+    max-width: 110px;
+    text-align: right;
+  }
+  .idc-watermark {
+    position: absolute;
+    right: 1.2rem;
+    bottom: 3.8rem;
+    opacity: 0.07;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .idc-watermark img {
+    width: 90px;
+    height: 90px;
+  }
+
+  .search-bar {
+    margin-bottom: 0.75rem;
+  }
+  .search-bar input {
+    width: 100%;
+    max-width: 340px;
+  }
+  .btn-sm {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.82rem;
+  }
+
+  /* ID card styles (kept separate) */
+  .id-preview h3 {
+    text-align: center;
+    color: var(--nac-dark);
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+  }
+  .id-preview .id-logo {
+    text-align: center;
+    margin-bottom: 0.75rem;
+  }
+  .id-preview .id-logo img {
+    width: 52px; height: 52px;
+    object-fit: cover;
+  }
+  .id-field {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 0.9rem;
+  }
+  .id-field span:first-child {
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+  .signature-area {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+    gap: 1rem;
+  }
+  .signature-line {
+    flex: 1;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--muted);
+    border-top: 1px solid #a0aec0;
+    padding-top: 0.35rem;
+  }
+
+  @media print {
+    body * { visibility: hidden; }
+    .print-section, .print-section * { visibility: visible; }
+    .print-section {
+      position: absolute;
+      left: 0; top: 0;
+      width: 100%;
+    }
+    .no-print { display: none !important; }
+  }
+
+  /* Module header (Apostle / Congregation dashboards) */
+  .module-header {
+    background: linear-gradient(135deg, #1e5aa8 0%, #2563eb 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    padding: 1rem 1.25rem;
+    margin: -0.5rem -0.5rem 0 -0.5rem;
+  }
+  .module-header-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+  .module-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: white;
+    padding: 3px;
+    object-fit: cover;
+  }
+  .module-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .module-subtitle {
+    font-size: 0.8rem;
+    opacity: 0.9;
+  }
+
+  .sub-nav {
+    display: flex;
+    gap: 0;
+    background: white;
+    border-bottom: 2px solid #e2e8f0;
+    margin: 0 -0.5rem 1.25rem -0.5rem;
+    overflow-x: auto;
+  }
+  .sub-nav-btn {
+    flex: 1;
+    min-width: 90px;
+    background: none;
+    border: none;
+    padding: 0.85rem 0.5rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .sub-nav-btn:hover { color: var(--nac-blue); background: #f8fafc; }
+  .sub-nav-btn.active {
+    color: var(--nac-blue);
+    border-bottom-color: var(--nac-blue);
+    background: #f0f7ff;
+  }
+
+  .sub-panel { display: none; }
+  .sub-panel.active { display: block; animation: fadeIn 0.2s ease; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .stats-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  .stat-card {
+    background: white;
+    border-radius: 14px;
+    padding: 1.15rem 0.75rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
+  }
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #1e40af;
+    line-height: 1.2;
+  }
+  .stat-label {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-top: 0.25rem;
+    font-weight: 500;
+  }
+
+  .action-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  @media (min-width: 560px) {
+    .action-cards { grid-template-columns: 1fr 1fr; }
+  }
+  .action-card {
+    background: white;
+    border-radius: 14px;
+    padding: 1.5rem 1.25rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .action-card:hover {
+    border-color: #93c5fd;
+    box-shadow: 0 4px 16px rgba(37,99,235,0.12);
+    transform: translateY(-2px);
+  }
+  .action-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  .action-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e3a5f;
+  }
+  .action-desc {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin-top: 0.2rem;
+  }
+
+
+/* Improved membership card alignment */
+.id-card-modern { width: 520px; }
+.idc-body { display:grid; grid-template-columns:110px minmax(0,1fr); align-items:start; gap:16px; }
+.idc-info-col { min-width:0; display:grid; grid-template-columns:1fr; align-content:start; }
+.idc-role { position:static; justify-self:start; margin-bottom:6px; }
+.idc-label { margin-top:7px; line-height:1.15; }
+.idc-value { overflow-wrap:anywhere; word-break:normal; min-width:0; }
+.idc-footer { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:end; }
+.idc-motto { grid-column:1/-1; max-width:none; text-align:right; }
+@media (max-width:520px) {
+  .id-card-modern { width:100%; }
+  .idc-body { grid-template-columns:88px minmax(0,1fr); gap:10px; padding:12px; }
+  .idc-photo { width:88px; height:112px; }
+  .idc-footer { grid-template-columns:1fr; gap:8px; }
+  .idc-sig-block { justify-self:start; }
+  .idc-motto { text-align:left; }
+}
+@media print {
+  .id-card-modern { width:520px !important; max-width:100% !important; margin:0 auto !important; box-shadow:none !important; }
+  .idc-body { display:grid !important; grid-template-columns:110px minmax(0,1fr) !important; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <img id="loginIcon" src="data:image/jpeg;base64,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" alt="NAC Logo">
+    <h1>New Apostolic Church</h1>
+    <p>Congregation Management Suite</p>
+    <input type="password" id="pwInput" placeholder="Enter password" autocomplete="current-password">
+    <button id="loginBtn">Unlock App</button>
+    <div class="login-error" id="loginError">Incorrect password. Please try again.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="header-content">
+      <div class="logo">
+        <img id="headerIcon" src="data:image/jpeg;base64,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" alt="NAC">
+        <span>NAC Congregation Suite</span>
+      </div>
+      <nav>
+        <button class="nav-btn active" data-panel="congregation">Congregation Reports</button>
+        <button class="nav-btn" data-panel="apostles">Apostles Reports</button>
+        <button class="nav-btn" data-panel="baptism">Baptism Certificate</button>
+        <button class="nav-btn" data-panel="idcard">Membership ID</button>
+      </nav>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- CONGREGATION REPORTS -->
+    
+    <div class="panel active" id="panel-congregation">
+      <div class="module-header">
+        <div class="module-header-inner">
+          <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCACAAIADASIAAhEBAxEB/8QAGgABAAIDAQAAAAAAAAAAAAAAAAEFAgQGA//EAEgQAAEDAwAFBggJCgcBAAAAAAEAAgMEBRESITFRcQYTMkFhkRQiJDV0gaHCFRYjNkJSVbPRVFZicpKTlKKjsSVjc4Kk0uHw/8QAGQEBAQEBAQEAAAAAAAAAAAAAAAIDAQQF/8QAKBEAAgIBAgQGAwEAAAAAAAAAAAECESESsQMiMZEyQVFhocFCcYHR/9oADAMBAAIRAxEAPwDyLjvPeoyd571CL758EnJ3nvTJ3nvUIuAnSO896ZO896hEBOTvPemTvPeoVpaKWkmhuFRWxyyx0sAkDIpNAuJeG7cHeuSlpVnYrU6KzJ3nvTJ3nvVrc6ahFroq6ihmhE0ksbmSy850dHWDgb1UpGWpWJKnROkd570yd571CLpwnJ3nvTJ3nvUIgJyd571LSdIazt3rFS3pDigIREQBERAERdRZnXL4t6NpnbFUeGOMuJWMcWaAx0jszlTOWlWVCOp0cure0+ab76Kz71qt8csvy4/xcP4rVuTeVBts5rql8lIMGUCeNwxkYyGnOM4WTnqxa7mqhpzT7GlWfNa1ekVHuKoXQWdvKP4PDrbUOipS92MzRsBdqzjSPBb2OWP5d/yofxTXpbVruc0aqdPscii6yvddhycr23ipZI4yQ8wDNG850jpY0TuwuTWkJ6kROOlhERWQFLekOKhS3pDigIREQBERAFBAO0A8QpRARot+qO5W9oAFpvuAB5IzZ/qtVbNBLTvDJo3McWh4DhtaRkH1hWdp80330Rn3rVHE8Pbcvh+LvsRWAHkra8gHyip2/wCxVGg36o7lcVfzWtfpFT7irIIJamdkMEbpJXnDWNGSUg8N+73E+q/h5AAbAApRFZAREQBS3pDioUt6Q4oCEREAREQGTY5Hse9rHOawAvcBkNBOBndrWK3rVXi31ofIznKaRpiqIvrxnaOPWO0BY3SgNurnQB/OREB8Mo2SRnW13d7cqdXNTK08to27l5VY7XW7XRtfRycWHLf5XexLT5pvvojPvWpbvKrHdaLa6NrKyMdrDou/ld7EtPmm++iM+9asniLj6P7NFmSft9Cs+a1r9IqfcU2PyeO43HrpqYtjP+ZJ4jfYXH1KKv5rWv0ip9xJvJeStNFsfW1Dp3fqMGi32l3cu9Y16v7HR36L6KjZqWRikETZSxwjcS1ryNRI2gH1he1DRS3CtipYcachxk7GjaXHsAyVtXithqZo6ekyKGlbzUAP0h1vPa46+5aauakZqPLbK1ERUSFLekOKhS3pDigIREQBblup6WqmdDU1Jp3PbiKRw8QP3P6wDvGxaaLjVo6nTPerpJ6CqfTVMZjlYdbT/cbx2qzo/wDF7S63nXWUgdLSb3s2vj94etYUldBWUzLfdHERsGKeqxl0HYfrM7OrqWtPT1tkuMZJ5uaMiSKRhy1w6nNPWCs22+V9TRUsroelgqGU98pTKfkZXGGX9R40T/fK2qKnfSUfKOmk6cMAjdxEzQvG8wRyc1daRgZT1eSWN2QzDps79Y7D2K0qJoquO91kT2uNTboJZA09GTnGBwPbkZ9aibvPr9MqKrD8v8KyrBPJe1Boy41NQAN58ROUZEdzbRMPiUMLKYcWjLj+0SrC3GnbQWGWqe1kEVXUyv0jt0QxwHrIA9arrdA24V9RcK/JpYcz1J63EnUwdrjq4ZXYum36XuGrVLzrY9PNFk3VtwZr3x0/4vI7h2qphhlqZ2Qwxukle7RaxoySexbbzW367Oc2PnKmd2QxuoNG7saB3ALbmq6e0QPo7bKJal7dGorW9Y62R7m73bTwVJuOF4mS0nnyRp3Kjp6AxwNqOeqm58I0MGNh6mtPWR1nZuWihRapUqZm2m8BS3pDioUt6Q4ocIREQBWdLX0Rpm0twoGyRtyGzweJM3PbsdwPeqxblDbKu5aYpGMe5mMtMrWk53AkZ9SmVVkqN3g232N1Qx01pqG18YGTG0aMzB2xnWeLcrGiuEXMfBl0a99ICdB4HylM7e3s3t6+K85LLeKJwkdb6yItOQ9sbtXaCFlV3iesp3Q3CninqAAGVL2lszeJHS9azpyxd7l9M1WxqSTyRRzUcdRzlMZA7xRhry3IDgDrGorftPmm++iM+9aqhW9p803z0Rn3rVfEXL2Jg7l3FX81rX6RU+4q1tRN4P4LzpbA6QSFnVpYxk+pWVX81bX6RU+4qhIdP69xPqv0ti3qq+npKV9vtbiY3jE9URh0/YB9FnZ19aiKxSsibUXKZlvp3a2mYEyPH6MY1n2DtXlRXaSgh0KOmhbVEnyot05ANzc6m8QMqW2q83GV0woa6d7zl0jo3HPElT4cXXv5ldc1exnPXW+CB9PbqIO026LqqrAfIR+i3os9p7VVLerrRW26Nr6uJsWkcBvONLvWASQtFXDTWHZE27yFLekOKhS3pDiqJIREQBQQNpAOFKIDtKDkTyjbBHPS18UAe0OAZUPGAdfUMLO78mOVjrY7wqsFdHGQ4RNcXvJ2astz171y9qYyquEFPVXB1JTuOHSlxw3V/wDBdR8XuT/54f1G/ivJNyhLL+D1wUZRwvk5r4u3r7Jrf3LlZWq13CljrYayy3R8NVCIyYIsObhwd1jHUvOpsrmVEjaflBb5YAfEe+t0SR2jqK8vgio+3Lb/AB6tz1Km9yFDS7S2Nu5Wutlt9JRUNluzY4HyPLqiLJJfj6o/RVX8Xb19k1v7ly2fgio+3Lb/AB6yjs0zpGiS/W1jCRpOFdkgb8daRnpVXuHHU7a2Lax8meVIonvo5zb2vf40chMbzjr6OcL1qeQ3KapBdUXGObr+UqXnPeFHxe5P/nh/Ub+K5y9Qw0FwdBQ3R9bBog84HHado24P/qiLlOXK/guSjCOV8lYW6Di3ABBIOFCIvWeQKW9IcVClvSHFAQiIgCIiAIiIDs46zkGI26durtLAzkuOv9pVtZHyTmkLqWpudOD9Ewh4HeQfaueRZLhU7Un3NXxb/FF9Sw8lY5A6prbnM0fRZTtZn15JVt4ZyCx5vrf5v+y4tEfCvrJhcWvxRnMYzPIYQ5sWkdAOOSG51Z7cLBEWpkEREAUt6Q4qFLekOKA//9k=" alt="NAC" class="module-logo">
+          <div>
+            <div class="module-title">Congregation Reports</div>
+            <div class="module-subtitle">New Apostolic Church</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub-nav">
+        <button class="sub-nav-btn active" data-sub="c-dashboard">🏠 Dashboard</button>
+        <button class="sub-nav-btn" data-sub="c-submit">✏️ Submit</button>
+        <button class="sub-nav-btn" data-sub="c-summary">📊 Summary</button>
+        <button class="sub-nav-btn" data-sub="c-search">🔍 Search</button>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div class="sub-panel active" id="c-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="cStatReports">0</div>
+            <div class="stat-label">Total Reports</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="cStatAttendance">0</div>
+            <div class="stat-label">Total Attendance</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="cStatOffering">K0</div>
+            <div class="stat-label">Total Offering</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="cStatSealed">0</div>
+            <div class="stat-label">Sealed Souls</div>
+          </div>
+        </div>
+        <div class="action-cards">
+          <div class="action-card" onclick="document.querySelector('[data-sub=\'c-submit\']').click()">
+            <div class="action-icon">📝</div>
+            <div class="action-title">Submit New Report</div>
+            <div class="action-desc">Record a congregation report</div>
+          </div>
+          <div class="action-card" onclick="document.querySelector('[data-sub=\'c-summary\']').click()">
+            <div class="action-icon">📊</div>
+            <div class="action-title">Generate Summary</div>
+            <div class="action-desc">Monthly report overview</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:1.25rem;">
+          <h3 style="margin-bottom:0.75rem;color:var(--nac-dark);">Recent Reports</h3>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr><th>Date</th><th>Congregation</th><th>District</th><th>Attendance</th><th>Offering</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="cRecentBody">
+                <tr><td colspan="6" style="text-align:center;color:var(--muted);">No reports yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <div class="sub-panel" id="c-submit">
+        <div class="card">
+          <h2>✏️ Congregation Report</h2>
+          <form id="congForm">
+            <div class="grid-2">
+              <div>
+                <label>Congregation</label>
+                <input type="text" id="c_cong" required placeholder="e.g. Suanlont">
+              </div>
+              <div>
+                <label>District</label>
+                <input type="text" id="c_district" placeholder="e.g. Aitape West">
+              </div>
+              <div>
+                <label>AM / PM</label>
+                <select id="c_ampm">
+                  <option value="">—</option>
+                  <option value="AM">AM</option>
+                  <option value="PM">PM</option>
+                </select>
+              </div>
+              <div>
+                <label>Date</label>
+                <input type="date" id="c_date" required>
+              </div>
+              <div>
+                <label>Offering K</label>
+                <input type="number" id="c_offering" min="0" step="0.01" placeholder="0">
+              </div>
+              <div>
+                <label>Attendance</label>
+                <input type="number" id="c_attendance" min="0" placeholder="0">
+              </div>
+              <div>
+                <label>Members sealed this month</label>
+                <input type="number" id="c_sealed" min="0" placeholder="0">
+              </div>
+              <div>
+                <label>Number of Deaths this month</label>
+                <input type="number" id="c_deaths" min="0" placeholder="0">
+              </div>
+              <div>
+                <label>Sunday School Att.</label>
+                <input type="number" id="c_ss" min="0" placeholder="0">
+              </div>
+              <div>
+                <label>Confirmands Att.</label>
+                <input type="number" id="c_confirm" min="0" placeholder="0">
+              </div>
+              <div>
+                <label>Offering Book No.</label>
+                <input type="text" id="c_book" placeholder="Book number">
+              </div>
+              <div>
+                <label>Receipt No.</label>
+                <input type="text" id="c_receipt" placeholder="e.g. 2437478">
+              </div>
+            </div>
+            <div style="margin-top:1rem;">
+              <label>Officiant / Assistance (1)</label>
+              <input type="text" id="c_off1" placeholder="Name">
+            </div>
+            <div style="margin-top:0.5rem;">
+              <label>Officiant / Assistance (2)</label>
+              <input type="text" id="c_off2" placeholder="Name">
+            </div>
+            <div style="margin-top:0.5rem;">
+              <label>Officiant / Assistance (3)</label>
+              <input type="text" id="c_off3" placeholder="Name">
+            </div>
+            <div style="margin-top:1rem;">
+              <label>Notes</label>
+              <textarea id="c_notes" placeholder="Optional notes..."></textarea>
+            </div>
+            <div style="margin-top:1rem;">
+              <label>Bank Deposit Slip (image)</label>
+              <input type="file" id="c_slipFile" accept="image/*" style="padding:0.4rem;">
+              <input type="hidden" id="c_slipData">
+              <div id="c_slipPreview" style="margin-top:0.5rem;display:none;">
+                <img id="c_slipThumb" style="max-width:180px;max-height:120px;border-radius:6px;border:1px solid #cbd5e0;">
+              </div>
+            </div>
+            <div class="btn-row">
+              <button type="submit" class="btn btn-primary">💾 Save Report</button>
+              <button type="button" class="btn btn-outline" id="congClearBtn">Clear</button>
+              <button type="button" class="btn btn-outline" id="congPreviewBtn">👁 Preview Receipt</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card" id="congPreviewCard" style="display:none;">
+          <h2>Receipt Preview</h2>
+          <div class="preview-area">
+            <div class="receipt-preview print-section" id="congReceiptPreview"></div>
+          </div>
+          <div class="btn-row no-print">
+            <button class="btn btn-success" onclick="window.print()">🖨 Print Receipt</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUMMARY -->
+      <div class="sub-panel" id="c-summary">
+        <div class="card">
+          <h2>📊 Monthly & Yearly Summary</h2>
+          <div id="congSummaryBox" class="summary-table-wrap" style="padding:0.5rem 0;"></div>
+          <div class="btn-row no-print" style="margin-top:1rem;">
+            <button class="btn btn-success" onclick="printSummaryTable('congregation')">🖨 Print Table</button>
+            <button class="btn btn-outline" id="congShareSummaryBtn">📤 Share Summary</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEARCH -->
+      <div class="sub-panel" id="c-search">
+        <div class="card">
+          <h2>🔍 Search Reports</h2>
+          <div class="search-bar" style="margin-bottom:1rem;">
+            <input type="text" id="congSearch" placeholder="Search congregation, district, receipt..." style="max-width:100%;">
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Congregation</th>
+                  <th>District</th>
+                  <th>AM/PM</th>
+                  <th>Attendance</th>
+                  <th>Offering K</th>
+                  <th>Receipt No.</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="congTableBody">
+                <tr><td colspan="8" style="text-align:center;color:var(--muted);">No reports saved yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<div class="panel" id="panel-apostles">
+      <!-- Sub-nav for Apostles module -->
+      <div class="module-header">
+        <div class="module-header-inner">
+          <img src="data:image/jpeg;base64,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" alt="NAC" class="module-logo">
+          <div>
+            <div class="module-title">Apostle Reports</div>
+            <div class="module-subtitle">New Apostolic Church</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub-nav">
+        <button class="sub-nav-btn active" data-sub="a-dashboard">🏠 Dashboard</button>
+        <button class="sub-nav-btn" data-sub="a-submit">✏️ Submit</button>
+        <button class="sub-nav-btn" data-sub="a-summary">📊 Summary</button>
+        <button class="sub-nav-btn" data-sub="a-search">🔍 Search</button>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div class="sub-panel active" id="a-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="aStatReports">0</div>
+            <div class="stat-label">Total Reports</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="aStatAttendance">0</div>
+            <div class="stat-label">Total Attendance</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="aStatOffering">K0</div>
+            <div class="stat-label">Total Offering</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="aStatSealed">0</div>
+            <div class="stat-label">Sealed Souls</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="aStatOrdained">0</div>
+            <div class="stat-label">Ministers Ordained</div>
+          </div>
+        </div>
+
+        <div class="action-cards">
+          <div class="action-card" onclick="document.querySelector('[data-sub=\'a-submit\']').click()">
+            <div class="action-icon">📝</div>
+            <div class="action-title">Submit New Report</div>
+            <div class="action-desc">Record a service report</div>
+          </div>
+          <div class="action-card" onclick="document.querySelector('[data-sub=\'a-summary\']').click()">
+            <div class="action-icon">📊</div>
+            <div class="action-title">Generate Summary</div>
+            <div class="action-desc">Monthly report overview</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:1.25rem;">
+          <h3 style="margin-bottom:0.75rem;color:var(--nac-dark);">Recent Reports</h3>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Congregation</th>
+                  <th>Type</th>
+                  <th>Attendance</th>
+                  <th>Offering</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="aRecentBody">
+                <tr><td colspan="6" style="text-align:center;color:var(--muted);">No reports yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <div class="sub-panel" id="a-submit">
+        <div class="card">
+          <h2>✏️ Submit Service Report</h2>
+          <form id="apostleForm">
+            <div class="grid-2">
+              <div>
+                <label>Date of Service</label>
+                <input type="date" id="a_date" required>
+              </div>
+              <div>
+                <label>Type of Service</label>
+                <select id="a_type">
+                  <option value="Divine Service">Divine Service</option>
+                  <option value="Holy Communion">Holy Communion</option>
+                  <option value="Baptism">Baptism</option>
+                  <option value="Sealing">Sealing</option>
+                  <option value="Confirmation">Confirmation</option>
+                  <option value="Wedding">Wedding</option>
+                  <option value="Funeral">Funeral</option>
+                  <option value="Youth Service">Youth Service</option>
+                  <option value="Choir Practice">Choir Practice</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label>Congregation</label>
+                <input type="text" id="a_cong" required placeholder="e.g. Hambeli">
+              </div>
+              <div>
+                <label>Sub-District</label>
+                <input type="text" id="a_subdistrict" placeholder="e.g. Yangoru">
+              </div>
+              <div>
+                <label>Province / District</label>
+                <input type="text" id="a_province" placeholder="e.g. East Sepik">
+              </div>
+              <div>
+                <label>Attendance</label>
+                <input type="number" id="a_attendance" min="0" placeholder="0">
+              </div>
+              <div>
+                <label>Offering (K)</label>
+                <input type="number" id="a_offering" min="0" step="0.01" placeholder="0.00">
+              </div>
+              <div>
+                <label>Sealed Souls (this service)</label>
+                <input type="number" id="a_sealed" min="0" placeholder="0">
+              </div>
+              <div>
+                <label>Ministers Ordained (this service)</label>
+                <input type="number" id="a_ordained" min="0" step="1" placeholder="0">
+              </div>
+              <div>
+                <label>Apostle Conducting the Service</label>
+                <input type="text" id="a_apostle" required placeholder="Full name of Apostle">
+              </div>
+            </div>
+            <div style="margin-top:1rem;">
+              <label>Field Notes</label>
+              <textarea id="a_notes" placeholder="Observations, special events, follow-up needed..."></textarea>
+            </div>
+            <div style="margin-top:1rem;">
+              <label>Bank Deposit Slip (image)</label>
+              <input type="file" id="a_slipFile" accept="image/*" style="padding:0.4rem;">
+              <input type="hidden" id="a_slipData">
+              <div id="a_slipPreview" style="margin-top:0.5rem;display:none;">
+                <img id="a_slipThumb" style="max-width:180px;max-height:120px;border-radius:6px;border:1px solid #cbd5e0;">
+              </div>
+            </div>
+            <div class="btn-row">
+              <button type="submit" class="btn btn-primary">💾 Save Report</button>
+              <button type="button" class="btn btn-outline" id="apostleClearBtn">Clear</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- SUMMARY -->
+      <div class="sub-panel" id="a-summary">
+        <div class="card">
+          <h2>📊 Monthly & Yearly Summary</h2>
+          <div id="apostleSummaryBox" class="summary-table-wrap" style="padding:0.5rem 0;"></div>
+          <div class="btn-row no-print" style="margin-top:1rem;">
+            <button class="btn btn-success" onclick="printSummaryTable('apostles')">🖨 Print Table</button>
+            <button class="btn btn-outline" id="apostleShareSummaryBtn">📤 Share Summary</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEARCH -->
+      <div class="sub-panel" id="a-search">
+        <div class="card">
+          <h2>🔍 Search Reports</h2>
+          <div class="search-bar" style="margin-bottom:1rem;">
+            <input type="text" id="apostleSearch" placeholder="Search by congregation, apostle, type, notes..." style="max-width:100%;">
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Congregation</th>
+                  <th>Type</th>
+                  <th>Attendance</th>
+                  <th>Offering (K)</th>
+                  <th>Apostle</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="apostleTableBody">
+                <tr><td colspan="7" style="text-align:center;color:var(--muted);">No reports saved yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<div class="panel" id="panel-baptism">
+      <div class="card">
+        <h2>💧 Certificate of Baptism and Sealing</h2>
+        <form id="baptismForm">
+          <div class="grid-2">
+            <div>
+              <label>Full Name of Person</label>
+              <input type="text" id="b_name" required placeholder="e.g. Tomarum Krakawa">
+            </div>
+            <div>
+              <label>Date of Birth</label>
+              <input type="date" id="b_dob">
+            </div>
+            <div>
+              <label>Father's Name</label>
+              <input type="text" id="b_father" placeholder="Father's full name">
+            </div>
+            <div>
+              <label>Mother's Name</label>
+              <input type="text" id="b_mother" placeholder="Mother's full name">
+            </div>
+            <div>
+              <label>Date of Baptism</label>
+              <input type="date" id="b_baptism" required>
+            </div>
+            <div>
+              <label>Date of Sealing</label>
+              <input type="date" id="b_sealed">
+            </div>
+            <div>
+              <label>Congregation</label>
+              <input type="text" id="b_cong" required placeholder="e.g. Hambeli">
+            </div>
+            <div>
+              <label>Certificate Number</label>
+              <input type="text" id="b_certno" placeholder="e.g. 0000001">
+            </div>
+            <div>
+              <label>Apostle / Signatory</label>
+              <input type="text" id="b_apostle" placeholder="Name for signature line">
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="btn btn-primary">💾 Save Certificate</button>
+            <button type="button" class="btn btn-outline" id="baptismPreviewBtn">👁 Live Preview</button>
+            <button type="button" class="btn btn-outline" id="baptismClearBtn">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Certificate Preview</h2>
+        <div class="preview-area">
+          <div class="cert-preview print-section" id="baptismPreview">
+            <div class="cert-header">
+              <img id="certIcon" src="data:image/jpeg;base64,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" alt="NAC">
+              <div class="church-name">New Apostolic Church</div>
+            </div>
+
+            <div class="cert-title">Certificate of Baptism and Sealing</div>
+            <div class="cert-subtitle">This Certifies that</div>
+
+            <div class="cert-name" id="bp_name">—</div>
+
+            <div class="cert-row">
+              <div class="cert-col">
+                <div class="cert-label">Father's Name</div>
+                <div class="cert-value" id="bp_father">—</div>
+              </div>
+              <div class="cert-col">
+                <div class="cert-label">Mother's Name</div>
+                <div class="cert-value" id="bp_mother">—</div>
+              </div>
+            </div>
+
+            <div class="cert-section">Date of Birth</div>
+            <div class="cert-dates">
+              <div class="cert-date-block">
+                <div class="cert-value" id="bp_dob">—</div>
+              </div>
+            </div>
+
+            <div class="cert-section">Has been Baptised on &nbsp;&nbsp;&nbsp; and Sealed on</div>
+            <div class="cert-dates">
+              <div class="cert-date-block">
+                <div class="cert-value" id="bp_baptism">—</div>
+              </div>
+              <div class="cert-date-block">
+                <div class="cert-value" id="bp_sealed">—</div>
+              </div>
+            </div>
+
+            <div class="cert-cong-label">In the congregation of</div>
+            <div class="cert-cong-name" id="bp_cong">—</div>
+
+            <div class="cert-footer">
+              <div class="cert-no">Certificate No. <span id="bp_certno">—</span></div>
+              <div class="cert-sig">
+                <div class="cert-sig-name" id="bp_apostle"></div>
+                <div class="cert-sig-line">Signature of Apostle</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="btn-row no-print">
+          <button class="btn btn-success" onclick="window.print()">🖨 Print Certificate</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Saved Baptism Certificates</h2>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Baptism Date</th>
+                <th>Congregation</th>
+                <th>Certificate No.</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="baptismTableBody">
+              <tr><td colspan="5" style="text-align:center;color:var(--muted);">No certificates saved yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+        <div class="panel" id="panel-idcard">
+      <div class="card">
+        <h2>🪪 Membership Identification Card</h2>
+        <form id="idForm">
+          <div class="grid-2">
+            <div>
+              <label>Full Name</label>
+              <input type="text" id="id_name" required placeholder="e.g. Jethro Wangi">
+            </div>
+            <div>
+              <label>Membership ID</label>
+              <input type="text" id="id_memno" required placeholder="e.g. NAC-2026-01009804">
+            </div>
+            <div>
+              <label>Date of Birth</label>
+              <input type="date" id="id_dob">
+            </div>
+            <div>
+              <label>Role / Ministry</label>
+              <select id="id_role">
+                <option value="MEMBER">MEMBER</option>
+                <option value="PRIEST">PRIEST</option>
+                <option value="DEACON">DEACON</option>
+                <option value="EVANGELIST">EVANGELIST</option>
+                <option value="SHEPHERD">SHEPHERD</option>
+                <option value="DISTRICT ELDER">DISTRICT ELDER</option>
+                <option value="APOSTLE">APOSTLE</option>
+                <option value="BISHOP">BISHOP</option>
+              </select>
+            </div>
+            <div>
+              <label>Congregation</label>
+              <input type="text" id="id_cong" required placeholder="e.g. Hambeli">
+            </div>
+            <div>
+              <label>District</label>
+              <input type="text" id="id_district" placeholder="e.g. Yangoru Central">
+            </div>
+            <div>
+              <label>Date Issued</label>
+              <input type="date" id="id_issued">
+            </div>
+            <div>
+              <label>Date Sealed</label>
+              <input type="date" id="id_sealed">
+            </div>
+            <div>
+              <label>Expires</label>
+              <input type="date" id="id_expires">
+            </div>
+            <div>
+              <label>Authorized Signature Name</label>
+              <input type="text" id="id_signatory" placeholder="e.g. A. Wasimbai">
+            </div>
+            <div style="grid-column:1/-1;">
+              <label>Photo</label>
+              <input type="file" id="id_photoFile" accept="image/*" style="padding:0.4rem;">
+              <input type="hidden" id="id_photoData">
+              <div id="id_photoPreview" style="margin-top:0.5rem;display:none;">
+                <img id="id_photoThumb" style="max-width:100px;max-height:100px;border-radius:8px;border:2px solid #cbd5e0;">
+              </div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="btn btn-primary">💾 Save ID Card</button>
+            <button type="button" class="btn btn-outline" id="idPreviewBtn">👁 Live Preview</button>
+            <button type="button" class="btn btn-outline" id="idClearBtn">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>ID Card Preview</h2>
+        <div class="preview-area" style="overflow-x:auto;">
+          <div class="id-card-modern print-section" id="idCardPreview">
+            <div class="idc-header">
+              <div class="idc-logo-wrap">
+                <img src="data:image/jpeg;base64,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" alt="NAC">
+              </div>
+              <div class="idc-header-text">
+                <div class="idc-church">NEW APOSTOLIC CHURCH</div>
+                <div class="idc-subtitle">MEMBERSHIP IDENTIFICATION CARD</div>
+              </div>
+            </div>
+            <div class="idc-body">
+              <div class="idc-photo-col">
+                <div class="idc-photo" id="idp_photoBox">
+                  <span class="idc-no-photo">Photo</span>
+                </div>
+              </div>
+              <div class="idc-info-col">
+                <div class="idc-role" id="idp_role">MEMBER</div>
+                <div class="idc-label">FULL NAME</div>
+                <div class="idc-value idc-name" id="idp_name">—</div>
+                <div class="idc-label">MEMBERSHIP ID</div>
+                <div class="idc-value idc-memno" id="idp_memno">—</div>
+                <div class="idc-label">DATE OF BIRTH</div>
+                <div class="idc-value" id="idp_dob">—</div>
+                <div class="idc-label">CONGREGATION</div>
+                <div class="idc-value" id="idp_cong">—</div>
+                <div class="idc-label">DISTRICT</div>
+                <div class="idc-value" id="idp_district">—</div>
+              </div>
+            </div>
+            <div class="idc-footer">
+              <div class="idc-dates">
+                <div>Issued: <span id="idp_issued">—</span> · Sealed: <span id="idp_sealed">—</span></div>
+                <div>Expires: <span id="idp_expires">—</span></div>
+              </div>
+              <div class="idc-sig-block">
+                <div class="idc-sig-name" id="idp_signatory"></div>
+                <div class="idc-sig-line">AUTHORIZED SIGNATURE</div>
+              </div>
+              <div class="idc-motto">"Come, Lord Jesus!"</div>
+            </div>
+            <div class="idc-watermark">
+              <img src="data:image/jpeg;base64,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" alt="">
+            </div>
+          </div>
+        </div>
+        <div class="btn-row no-print">
+          <button class="btn btn-success" onclick="window.print()">🖨 Print ID Card</button>
+          <button class="btn btn-outline" id="idShareBtn">📤 Share</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Saved Membership Cards</h2>
+        <div class="search-bar no-print">
+          <input type="text" id="idSearch" placeholder="Search by name, ID, congregation..." style="max-width:320px;">
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Membership ID</th>
+                <th>Role</th>
+                <th>Congregation</th>
+                <th>District</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="idTableBody">
+              <tr><td colspan="6" style="text-align:center;color:var(--muted);">No ID cards saved yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const NAC_ICON = "data:image/jpeg;base64,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";
+
+// Set all icons
+document.querySelectorAll('img[src="data:image/jpeg;base64,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"]').forEach(img => {
+  img.src = NAC_ICON;
+});
+
+// ===== AUTH =====
+const PASSWORD = "nacaramba";
+const loginScreen = document.getElementById("loginScreen");
+const app = document.getElementById("app");
+const pwInput = document.getElementById("pwInput");
+const loginBtn = document.getElementById("loginBtn");
+const loginError = document.getElementById("loginError");
+
+function checkAuth() {
+  if (sessionStorage.getItem("nac_auth") === "1") {
+    loginScreen.classList.add("hidden");
+    app.classList.add("visible");
+  }
+}
+checkAuth();
+
+loginBtn.addEventListener("click", doLogin);
+pwInput.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+
+function doLogin() {
+  if (pwInput.value === PASSWORD) {
+    sessionStorage.setItem("nac_auth", "1");
+    loginScreen.classList.add("hidden");
+    app.classList.add("visible");
+    loginError.style.display = "none";
+    pwInput.value = "";
+  } else {
+    loginError.style.display = "block";
+    pwInput.select();
+  }
+}
+
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  sessionStorage.removeItem("nac_auth");
+  location.reload();
+});
+
+// ===== NAV =====
+document.querySelectorAll(".nav-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("panel-" + btn.dataset.panel).classList.add("active");
+  });
+});
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+// ===== STORAGE HELPERS =====
+function load(key) {
+  try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; }
+}
+function save(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+function fileToDataURL(file, cb) {
+  if (!file) { cb(""); return; }
+  const reader = new FileReader();
+  reader.onload = () => cb(reader.result);
+  reader.readAsDataURL(file);
+}
+
+// ===== CONGREGATION REPORTS =====
+// Sub-nav
+document.querySelectorAll('#panel-congregation .sub-nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#panel-congregation .sub-nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#panel-congregation .sub-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const target = document.getElementById(btn.dataset.sub);
+    if (target) target.classList.add('active');
+    if (btn.dataset.sub === 'c-dashboard') updateCongDashboard();
+    if (btn.dataset.sub === 'c-summary') renderCongSummary();
+    if (btn.dataset.sub === 'c-search') renderCongTable(document.getElementById('congSearch')?.value || '');
+  });
+});
+
+const congForm = document.getElementById("congForm");
+congForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const rec = {
+    id: Date.now(),
+    cong: document.getElementById("c_cong").value.trim(),
+    district: document.getElementById("c_district").value.trim(),
+    ampm: document.getElementById("c_ampm").value,
+    date: document.getElementById("c_date").value,
+    day: document.getElementById("c_date").value ? document.getElementById("c_date").value.split("-")[2] : "",
+    month: document.getElementById("c_date").value ? document.getElementById("c_date").value.split("-")[1] : "",
+    year: document.getElementById("c_date").value ? document.getElementById("c_date").value.split("-")[0] : "",
+    offering: document.getElementById("c_offering").value || "0",
+    attendance: document.getElementById("c_attendance").value || "0",
+    sealed: document.getElementById("c_sealed").value || "0",
+    deaths: document.getElementById("c_deaths").value || "0",
+    ss: document.getElementById("c_ss").value || "0",
+    confirm: document.getElementById("c_confirm").value || "0",
+    book: document.getElementById("c_book").value.trim(),
+    receipt: document.getElementById("c_receipt").value.trim(),
+    off1: document.getElementById("c_off1").value.trim(),
+    off2: document.getElementById("c_off2").value.trim(),
+    off3: document.getElementById("c_off3").value.trim(),
+    notes: document.getElementById("c_notes").value.trim(),
+    slip: document.getElementById("c_slipData").value || ""
+  };
+  const list = load("nac_cong");
+  list.unshift(rec);
+  save("nac_cong", list);
+  showToast("Congregation report saved");
+  congForm.reset();
+  document.getElementById("c_slipData").value = "";
+  document.getElementById("c_slipPreview").style.display = "none";
+  updateCongDashboard();
+  document.querySelector('[data-sub="c-dashboard"]')?.click();
+});
+
+document.getElementById("congClearBtn")?.addEventListener("click", () => {
+  congForm.reset();
+  document.getElementById("c_slipData").value = "";
+  document.getElementById("c_slipPreview").style.display = "none";
+  document.getElementById("congPreviewCard").style.display = "none";
+});
+
+
+document.getElementById("c_slipFile")?.addEventListener("change", e => {
+  const file = e.target.files[0];
+  fileToDataURL(file, data => {
+    document.getElementById("c_slipData").value = data;
+    const prev = document.getElementById("c_slipPreview");
+    const thumb = document.getElementById("c_slipThumb");
+    if (data) {
+      thumb.src = data;
+      prev.style.display = "block";
+    } else {
+      prev.style.display = "none";
+    }
+  });
+});
+
+document.getElementById("congPreviewBtn")?.addEventListener("click", () => {
+  renderCongPreview();
+  document.getElementById("congPreviewCard").style.display = "block";
+});
+
+function renderCongPreview(rec) {
+  const r = rec || {
+    cong: document.getElementById("c_cong").value || "—",
+    district: document.getElementById("c_district").value || "—",
+    ampm: document.getElementById("c_ampm").value || "—",
+    date: document.getElementById("c_date").value || "",
+    day: document.getElementById("c_date").value ? document.getElementById("c_date").value.split("-")[2] : "—",
+    month: document.getElementById("c_date").value ? document.getElementById("c_date").value.split("-")[1] : "—",
+    year: document.getElementById("c_date").value ? document.getElementById("c_date").value.split("-")[0] : "—",
+    offering: document.getElementById("c_offering").value || "0",
+    attendance: document.getElementById("c_attendance").value || "0",
+    sealed: document.getElementById("c_sealed").value || "0",
+    deaths: document.getElementById("c_deaths").value || "0",
+    ss: document.getElementById("c_ss").value || "0",
+    confirm: document.getElementById("c_confirm").value || "0",
+    book: document.getElementById("c_book").value || "—",
+    receipt: document.getElementById("c_receipt").value || "—",
+    off1: document.getElementById("c_off1").value || "—",
+    off2: document.getElementById("c_off2").value || "—",
+    off3: document.getElementById("c_off3").value || "—",
+    notes: document.getElementById("c_notes").value || ""
+  };
+  const html = `
+    <div style="font-family:monospace;font-size:0.9rem;line-height:1.5;">
+      <div style="text-align:center;font-weight:700;font-size:1.1rem;margin-bottom:0.5rem;">NEW APOSTOLIC CHURCH</div>
+      <div style="text-align:center;margin-bottom:0.75rem;color:#555;">Congregation Report / Receipt</div>
+      <div><b>Congregation:</b> ${r.cong}</div>
+      <div><b>District:</b> ${r.district}</div>
+      <div><b>AM/PM:</b> ${r.ampm} &nbsp; <b>Date:</b> ${r.day}/${r.month}/${r.year}</div>
+      <div><b>Offering K:</b> ${r.offering}</div>
+      <div><b>Attendance:</b> ${r.attendance}</div>
+      <div><b>Members sealed:</b> ${r.sealed}</div>
+      <div><b>Deaths:</b> ${r.deaths}</div>
+      <div><b>Sunday School Att:</b> ${r.ss}</div>
+      <div><b>Confirmands Att:</b> ${r.confirm}</div>
+      <div><b>Book No:</b> ${r.book}</div>
+      <div style="color:#c53030;font-weight:700;"><b>Receipt No:</b> ${r.receipt}</div>
+      <div style="margin-top:0.5rem;"><b>Officiants:</b><br>1. ${r.off1}<br>2. ${r.off2}<br>3. ${r.off3}</div>
+      ${r.notes ? `<div style="margin-top:0.5rem;"><b>Notes:</b> ${r.notes}</div>` : ""}
+      ${r.slip ? `<div style="margin-top:0.75rem;"><b>Bank Deposit Slip:</b><br><img src="${r.slip}" style="max-width:220px;max-height:160px;border-radius:6px;border:1px solid #cbd5e0;margin-top:0.35rem;"></div>` : ""}
+    </div>
+  `;
+  document.getElementById("congReceiptPreview").innerHTML = html;
+  document.getElementById("congPreviewCard").style.display = "block";
+}
+
+function updateCongDashboard() {
+  const list = load("nac_cong");
+  let totalAtt = 0, totalOff = 0, totalSealed = 0, totalOrdained = 0;
+  list.forEach(r => {
+    totalAtt += parseFloat(r.attendance || 0);
+    totalOff += parseFloat(r.offering || 0);
+    totalSealed += parseFloat(r.sealed || 0);
+    totalOrdained += parseFloat(r.ordained || 0);
+  });
+  document.getElementById("cStatReports").textContent = list.length;
+  document.getElementById("cStatAttendance").textContent = totalAtt;
+  document.getElementById("cStatOffering").textContent = "K" + totalOff.toFixed(0);
+  document.getElementById("cStatSealed").textContent = totalSealed;
+
+  const tbody = document.getElementById("cRecentBody");
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);">No reports yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.slice(0, 5).map(r => {
+    const dateStr = r.date ? r.date.split("-").reverse().join("/") : (r.day && r.month && r.year ? `${r.day}/${r.month}/${r.year}` : "—");
+    return `<tr>
+      <td>${dateStr}</td>
+      <td>${r.cong || "—"}</td>
+      <td>${r.district || "—"}</td>
+      <td>${r.attendance || "0"}</td>
+      <td>K ${parseFloat(r.offering || 0).toFixed(2)}</td>
+      <td class="actions">
+        <button class="btn-sm-view" onclick="viewCong(${r.id})">View</button>
+        <button class="btn-sm-del" onclick="delCong(${r.id})">Del</button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+function renderCongTable(filter = "") {
+  let list = load("nac_cong");
+  if (filter) {
+    const q = filter.toLowerCase();
+    list = list.filter(r =>
+      (r.cong || "").toLowerCase().includes(q) ||
+      (r.district || "").toLowerCase().includes(q) ||
+      (r.receipt || "").toLowerCase().includes(q) ||
+      (r.notes || "").toLowerCase().includes(q)
+    );
+  }
+  const tbody = document.getElementById("congTableBody");
+  if (!tbody) return;
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);">No reports found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(r => {
+    const dateStr = r.date ? r.date.split("-").reverse().join("/") : (r.day && r.month && r.year ? `${r.day}/${r.month}/${r.year}` : "—");
+    return `<tr>
+      <td>${dateStr}</td>
+      <td>${r.cong || "—"}</td>
+      <td>${r.district || "—"}</td>
+      <td>${r.ampm || "—"}</td>
+      <td>${r.attendance || "0"}</td>
+      <td>K ${parseFloat(r.offering || 0).toFixed(2)}</td>
+      <td style="color:#c53030;font-weight:600;">${r.receipt || "—"}</td>
+      <td class="actions">
+        <button class="btn-sm-view" onclick="viewCong(${r.id})">View</button>
+        <button class="btn-sm-del" onclick="delCong(${r.id})">Del</button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+function renderCongSummary() {
+  const box = document.getElementById("congSummaryBox");
+  const list = load("nac_cong");
+  if (!list.length) {
+    box.innerHTML = "<em>No data to summarize yet. Submit some reports first.</em>";
+    window._congSummaryText = "";
+    return;
+  }
+
+  // Aggregate by Year, Month, District, Congregation
+  const rows = {};
+  list.forEach(r => {
+    const year = r.date ? r.date.slice(0, 4) : (r.year || "—");
+    const month = r.date ? r.date.slice(5, 7) : (r.month ? String(r.month).padStart(2, "0") : "—");
+    const district = r.district || "—";
+    const cong = r.cong || "—";
+    const key = `${year}|${month}|${district}|${cong}`;
+    if (!rows[key]) {
+      rows[key] = { year, month, district, cong, count: 0, attendance: 0, offering: 0, sealed: 0, deaths: 0 };
+    }
+    rows[key].count++;
+    rows[key].attendance += parseFloat(r.attendance || 0);
+    rows[key].offering += parseFloat(r.offering || 0);
+    rows[key].sealed += parseFloat(r.sealed || 0);
+    rows[key].deaths += parseFloat(r.deaths || 0);
+  });
+
+  const sorted = Object.values(rows).sort((a, b) => {
+    if (a.year !== b.year) return String(b.year).localeCompare(String(a.year));
+    if (a.month !== b.month) return String(b.month).localeCompare(String(a.month));
+    if (a.district !== b.district) return a.district.localeCompare(b.district);
+    return a.cong.localeCompare(b.cong);
+  });
+
+  let totalAtt = 0, totalOff = 0, totalSealed = 0, totalDeaths = 0;
+  sorted.forEach(r => {
+    totalAtt += r.attendance;
+    totalOff += r.offering;
+    totalSealed += r.sealed;
+    totalDeaths += r.deaths;
+  });
+
+  let html = `<div class="stats-grid" style="margin-bottom:1.25rem;">
+    <div class="stat-card"><div class="stat-value">${list.length}</div><div class="stat-label">Total Reports</div></div>
+    <div class="stat-card"><div class="stat-value">${totalAtt}</div><div class="stat-label">Total Attendance</div></div>
+    <div class="stat-card"><div class="stat-value">K${totalOff.toFixed(0)}</div><div class="stat-label">Total Offering</div></div>
+    <div class="stat-card"><div class="stat-value">${totalSealed}</div><div class="stat-label">Sealed Souls</div></div>
+  </div>`;
+
+  html += `<div style="overflow-x:auto;">
+    <table style="width:100%;font-size:0.88rem;">
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Month</th>
+          <th>District</th>
+          <th>Congregation</th>
+          <th>Reports</th>
+          <th>Attendance</th>
+          <th>Offering (K)</th>
+          <th>Sealed</th>
+          <th>Deaths</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  sorted.forEach(r => {
+    html += `<tr>
+      <td>${r.year}</td>
+      <td>${r.month}</td>
+      <td>${r.district}</td>
+      <td>${r.cong}</td>
+      <td>${r.count}</td>
+      <td>${r.attendance}</td>
+      <td>${r.offering.toFixed(2)}</td>
+      <td>${r.sealed}</td>
+      <td>${r.deaths}</td>
+    </tr>`;
+  });
+
+  html += `<tr style="font-weight:700;background:#f0f7ff;">
+      <td colspan="4">TOTAL</td>
+      <td>${list.length}</td>
+      <td>${totalAtt}</td>
+      <td>${totalOff.toFixed(2)}</td>
+      <td>${totalSealed}</td>
+      <td>${totalDeaths}</td>
+    </tr>`;
+  html += `</tbody></table></div>`;
+
+  box.innerHTML = html;
+
+  // Build plain-text version for sharing
+  let text = "NAC Congregation Reports Summary\\n\\n";
+  text += "Year | Month | District | Congregation | Reports | Attendance | Offering (K) | Sealed | Deaths\\n";
+  text += "-".repeat(90) + "\\n";
+  sorted.forEach(r => {
+    text += `${r.year} | ${r.month} | ${r.district} | ${r.cong} | ${r.count} | ${r.attendance} | ${r.offering.toFixed(2)} | ${r.sealed} | ${r.deaths}\\n`;
+  });
+  text += "-".repeat(90) + `\\nTOTAL |  |  |  | ${list.length} | ${totalAtt} | ${totalOff.toFixed(2)} | ${totalSealed} | ${totalDeaths}`;
+  window._congSummaryText = text;
+}
+
+window.viewCong = function(id) {
+  const r = load("nac_cong").find(x => x.id === id);
+  if (!r) return;
+  document.getElementById("c_cong").value = r.cong || "";
+  document.getElementById("c_district").value = r.district || "";
+  document.getElementById("c_ampm").value = r.ampm || "";
+  if (r.date) {
+    document.getElementById("c_date").value = r.date;
+  } else if (r.year && r.month && r.day) {
+    document.getElementById("c_date").value = `${r.year}-${String(r.month).padStart(2,"0")}-${String(r.day).padStart(2,"0")}`;
+  } else {
+    document.getElementById("c_date").value = "";
+  }
+  document.getElementById("c_offering").value = r.offering || "";
+  document.getElementById("c_attendance").value = r.attendance || "";
+  document.getElementById("c_sealed").value = r.sealed || "";
+  document.getElementById("c_deaths").value = r.deaths || "";
+  document.getElementById("c_ss").value = r.ss || "";
+  document.getElementById("c_confirm").value = r.confirm || "";
+  document.getElementById("c_book").value = r.book || "";
+  document.getElementById("c_receipt").value = r.receipt || "";
+  document.getElementById("c_off1").value = r.off1 || "";
+  document.getElementById("c_off2").value = r.off2 || "";
+  document.getElementById("c_off3").value = r.off3 || "";
+  document.getElementById("c_notes").value = r.notes || "";
+  document.getElementById("c_slipData").value = r.slip || "";
+  const prev = document.getElementById("c_slipPreview");
+  const thumb = document.getElementById("c_slipThumb");
+  if (r.slip) {
+    thumb.src = r.slip;
+    prev.style.display = "block";
+  } else {
+    prev.style.display = "none";
+  }
+  renderCongPreview(r);
+  document.querySelector('[data-sub="c-submit"]')?.click();
+};
+
+window.delCong = function(id) {
+  if (!confirm("Delete this report?")) return;
+  save("nac_cong", load("nac_cong").filter(x => x.id !== id));
+  updateCongDashboard();
+  renderCongTable(document.getElementById("congSearch")?.value || "");
+  showToast("Report deleted");
+};
+
+document.getElementById("congSearch")?.addEventListener("input", e => {
+  renderCongTable(e.target.value);
+});
+
+// ===== APOSTLES =====
+// Sub-nav switching
+document.querySelectorAll('#panel-apostles .sub-nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#panel-apostles .sub-nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#panel-apostles .sub-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const target = document.getElementById(btn.dataset.sub);
+    if (target) target.classList.add('active');
+    if (btn.dataset.sub === 'a-dashboard') updateApostleDashboard();
+    if (btn.dataset.sub === 'a-summary') renderApostleSummary();
+    if (btn.dataset.sub === 'a-search') renderApostleTable(document.getElementById('apostleSearch')?.value || '');
+  });
+});
+
+
+document.getElementById("a_slipFile")?.addEventListener("change", e => {
+  const file = e.target.files[0];
+  fileToDataURL(file, data => {
+    document.getElementById("a_slipData").value = data;
+    const prev = document.getElementById("a_slipPreview");
+    const thumb = document.getElementById("a_slipThumb");
+    if (data) {
+      thumb.src = data;
+      prev.style.display = "block";
+    } else {
+      prev.style.display = "none";
+    }
+  });
+});
+
+document.getElementById("apostleForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const rec = {
+    id: Date.now(),
+    date: document.getElementById("a_date").value,
+    type: document.getElementById("a_type").value,
+    cong: document.getElementById("a_cong").value.trim(),
+    subdistrict: document.getElementById("a_subdistrict").value.trim(),
+    province: document.getElementById("a_province").value.trim(),
+    attendance: document.getElementById("a_attendance").value || "0",
+    offering: document.getElementById("a_offering").value || "0",
+    sealed: document.getElementById("a_sealed").value || "0",
+    ordained: document.getElementById("a_ordained").value || "0",
+    apostle: document.getElementById("a_apostle").value.trim(),
+    notes: document.getElementById("a_notes").value.trim(),
+    slip: document.getElementById("a_slipData").value || ""
+  };
+  const list = load("nac_apostle");
+  list.unshift(rec);
+  save("nac_apostle", list);
+  showToast("Apostles report saved");
+  document.getElementById("apostleForm").reset();
+  document.getElementById("a_slipData").value = "";
+  document.getElementById("a_slipPreview").style.display = "none";
+  updateApostleDashboard();
+  // switch to dashboard
+  document.querySelector('[data-sub="a-dashboard"]')?.click();
+});
+
+document.getElementById("apostleClearBtn")?.addEventListener("click", () => {
+  document.getElementById("apostleForm").reset();
+  document.getElementById("a_slipData").value = "";
+  document.getElementById("a_slipPreview").style.display = "none";
+});
+
+function updateApostleDashboard() {
+  const list = load("nac_apostle");
+  let totalAtt = 0, totalOff = 0, totalSealed = 0;
+  list.forEach(r => {
+    totalAtt += parseFloat(r.attendance || 0);
+    totalOff += parseFloat(r.offering || 0);
+    totalSealed += parseFloat(r.sealed || 0);
+  });
+  document.getElementById("aStatReports").textContent = list.length;
+  document.getElementById("aStatAttendance").textContent = totalAtt;
+  document.getElementById("aStatOffering").textContent = "K" + totalOff.toFixed(0);
+  document.getElementById("aStatSealed").textContent = totalSealed;
+  document.getElementById("aStatOrdained").textContent = totalOrdained;
+
+  // Recent (last 5)
+  const tbody = document.getElementById("aRecentBody");
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);">No reports yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.slice(0, 5).map(r => `
+    <tr>
+      <td>${r.date || "—"}</td>
+      <td>${r.cong || "—"}</td>
+      <td>${r.type || "—"}</td>
+      <td>${r.attendance || "0"}</td>
+      <td>K ${parseFloat(r.offering || 0).toFixed(2)}</td>
+      <td class="actions">
+        <button class="btn-sm-view" onclick="viewApostle(${r.id})">View</button>
+        <button class="btn-sm-del" onclick="delApostle(${r.id})">Del</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function renderApostleTable(filter = "") {
+  let list = load("nac_apostle");
+  if (filter) {
+    const q = filter.toLowerCase();
+    list = list.filter(r =>
+      (r.cong || "").toLowerCase().includes(q) ||
+      (r.apostle || "").toLowerCase().includes(q) ||
+      (r.notes || "").toLowerCase().includes(q) ||
+      (r.type || "").toLowerCase().includes(q) ||
+      (r.subdistrict || "").toLowerCase().includes(q) ||
+      (r.province || "").toLowerCase().includes(q) ||
+      (r.date || "").includes(q)
+    );
+  }
+  const tbody = document.getElementById("apostleTableBody");
+  if (!tbody) return;
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);">No reports found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(r => `
+    <tr>
+      <td>${r.date || "—"}</td>
+      <td>${r.cong || "—"}</td>
+      <td>${r.type || "—"}</td>
+      <td>${r.attendance || "0"}</td>
+      <td>K ${parseFloat(r.offering || 0).toFixed(2)}</td>
+      <td>${r.apostle || "—"}</td>
+      <td class="actions">
+        <button class="btn-sm-view" onclick="viewApostle(${r.id})">View</button>
+        <button class="btn-sm-del" onclick="delApostle(${r.id})">Del</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function renderApostleSummary() {
+  const box = document.getElementById("apostleSummaryBox");
+  const list = load("nac_apostle");
+  if (!list.length) {
+    box.innerHTML = "<em>No data to summarize yet. Submit some reports first.</em>";
+    window._apostleSummaryText = "";
+    return;
+  }
+
+  const rows = {};
+  list.forEach(r => {
+    const year = r.date ? r.date.slice(0, 4) : "—";
+    const month = r.date ? r.date.slice(5, 7) : "—";
+    const district = r.province || r.subdistrict || "—";
+    const cong = r.cong || "—";
+    const key = `${year}|${month}|${district}|${cong}`;
+    if (!rows[key]) {
+      rows[key] = { year, month, district, cong, count: 0, attendance: 0, offering: 0, sealed: 0, ordained: 0 };
+    }
+    rows[key].count++;
+    rows[key].attendance += parseFloat(r.attendance || 0);
+    rows[key].offering += parseFloat(r.offering || 0);
+    rows[key].sealed += parseFloat(r.sealed || 0);
+    rows[key].ordained += parseFloat(r.ordained || 0);
+  });
+
+  const sorted = Object.values(rows).sort((a, b) => {
+    if (a.year !== b.year) return String(b.year).localeCompare(String(a.year));
+    if (a.month !== b.month) return String(b.month).localeCompare(String(a.month));
+    if (a.district !== b.district) return a.district.localeCompare(b.district);
+    return a.cong.localeCompare(b.cong);
+  });
+
+  let totalAtt = 0, totalOff = 0, totalSealed = 0, totalOrdained = 0;
+  sorted.forEach(r => {
+    totalAtt += r.attendance;
+    totalOff += r.offering;
+    totalSealed += r.sealed;
+    totalOrdained += r.ordained;
+  });
+
+  let html = `<div class="stats-grid" style="margin-bottom:1.25rem;">
+    <div class="stat-card"><div class="stat-value">${list.length}</div><div class="stat-label">Total Reports</div></div>
+    <div class="stat-card"><div class="stat-value">${totalAtt}</div><div class="stat-label">Total Attendance</div></div>
+    <div class="stat-card"><div class="stat-value">K${totalOff.toFixed(0)}</div><div class="stat-label">Total Offering</div></div>
+    <div class="stat-card"><div class="stat-value">${totalSealed}</div><div class="stat-label">Sealed Souls</div></div>
+  </div>`;
+
+  html += `<div style="overflow-x:auto;">
+    <table style="width:100%;font-size:0.88rem;">
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Month</th>
+          <th>District</th>
+          <th>Congregation</th>
+          <th>Services</th>
+          <th>Attendance</th>
+          <th>Offering (K)</th>
+          <th>Sealed</th>
+          <th>Ministers Ordained</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  sorted.forEach(r => {
+    html += `<tr>
+      <td>${r.year}</td>
+      <td>${r.month}</td>
+      <td>${r.district}</td>
+      <td>${r.cong}</td>
+      <td>${r.count}</td>
+      <td>${r.attendance}</td>
+      <td>${r.offering.toFixed(2)}</td>
+      <td>${r.sealed}</td>
+      <td>${r.ordained}</td>
+    </tr>`;
+  });
+
+  html += `<tr style="font-weight:700;background:#f0f7ff;">
+      <td colspan="4">TOTAL</td>
+      <td>${list.length}</td>
+      <td>${totalAtt}</td>
+      <td>${totalOff.toFixed(2)}</td>
+      <td>${totalSealed}</td>
+      <td>${totalOrdained}</td>
+    </tr>`;
+  html += `</tbody></table></div>`;
+
+  box.innerHTML = html;
+
+  let text = "NAC Apostle Reports Summary\\n\\n";
+  text += "Year | Month | District | Congregation | Services | Attendance | Offering (K) | Sealed | Ministers Ordained\\n";
+  text += "-".repeat(90) + "\\n";
+  sorted.forEach(r => {
+    text += `${r.year} | ${r.month} | ${r.district} | ${r.cong} | ${r.count} | ${r.attendance} | ${r.offering.toFixed(2)} | ${r.sealed} | ${r.ordained}\\n`;
+  });
+  text += "-".repeat(90) + "\\n";
+  text += `TOTAL |  |  |  | ${list.length} | ${totalAtt} | ${totalOff.toFixed(2)} | ${totalSealed} | ${totalOrdained}`;
+  window._apostleSummaryText = text;
+}
+
+window.viewApostle = function(id) {
+  const r = load("nac_apostle").find(x => x.id === id);
+  if (!r) return;
+  document.getElementById("a_date").value = r.date || "";
+  document.getElementById("a_type").value = r.type || "Divine Service";
+  document.getElementById("a_cong").value = r.cong || "";
+  document.getElementById("a_subdistrict").value = r.subdistrict || "";
+  document.getElementById("a_province").value = r.province || "";
+  document.getElementById("a_attendance").value = r.attendance || "";
+  document.getElementById("a_offering").value = r.offering || "";
+  document.getElementById("a_sealed").value = r.sealed || "";
+  document.getElementById("a_ordained").value = r.ordained || "0";
+  document.getElementById("a_apostle").value = r.apostle || "";
+  document.getElementById("a_notes").value = r.notes || "";
+  document.getElementById("a_slipData").value = r.slip || "";
+  const prev = document.getElementById("a_slipPreview");
+  const thumb = document.getElementById("a_slipThumb");
+  if (r.slip) {
+    thumb.src = r.slip;
+    prev.style.display = "block";
+  } else {
+    prev.style.display = "none";
+  }
+  document.querySelector('[data-sub="a-submit"]')?.click();
+};
+
+window.delApostle = function(id) {
+  if (!confirm("Delete this report?")) return;
+  save("nac_apostle", load("nac_apostle").filter(x => x.id !== id));
+  updateApostleDashboard();
+  renderApostleTable(document.getElementById("apostleSearch")?.value || "");
+  showToast("Report deleted");
+};
+
+document.getElementById("apostleSearch")?.addEventListener("input", e => {
+  renderApostleTable(e.target.value);
+});
+
+// Keep old name for INIT compatibility
+function renderApostleTable_compat() { updateApostleDashboard(); }
+
+
+// ===== BAPTISM CERTIFICATES =====
+function baptismValue(id) { return document.getElementById(id)?.value?.trim() || ""; }
+function updateBaptismPreview() {
+  const map = {
+    bp_name: "b_name", bp_father: "b_father", bp_mother: "b_mother",
+    bp_dob: "b_dob", bp_baptism: "b_baptism", bp_sealed: "b_sealed",
+    bp_cong: "b_cong", bp_certno: "b_certno", bp_apostle: "b_apostle"
+  };
+  Object.entries(map).forEach(([target, source]) => {
+    const el = document.getElementById(target);
+    if (!el) return;
+    const value = baptismValue(source);
+    el.textContent = source.startsWith("b_") && ["b_dob","b_baptism","b_sealed"].includes(source)
+      ? formatDateShort(value) : (value || "—");
+  });
+}
+["b_name","b_dob","b_father","b_mother","b_baptism","b_sealed","b_cong","b_certno","b_apostle"].forEach(id => {
+  document.getElementById(id)?.addEventListener("input", updateBaptismPreview);
+  document.getElementById(id)?.addEventListener("change", updateBaptismPreview);
+});
+document.getElementById("baptismPreviewBtn")?.addEventListener("click", updateBaptismPreview);
+document.getElementById("baptismForm")?.addEventListener("submit", e => {
+  e.preventDefault();
+  if (!baptismValue("b_certno")) {
+    document.getElementById("b_certno").value = "NAC-BAP-" + new Date().getFullYear() + "-" + String(Date.now()).slice(-6);
+  }
+  updateBaptismPreview();
+  const rec = {
+    id: Date.now(), name: baptismValue("b_name"), dob: baptismValue("b_dob"),
+    father: baptismValue("b_father"), mother: baptismValue("b_mother"),
+    baptism: baptismValue("b_baptism"), sealed: baptismValue("b_sealed"),
+    cong: baptismValue("b_cong"), certno: baptismValue("b_certno"),
+    apostle: baptismValue("b_apostle")
+  };
+  const records = load("nac_baptism");
+  records.unshift(rec); save("nac_baptism", records);
+  renderBaptismTable();
+  showToast("Baptism certificate saved and generated");
+});
+document.getElementById("baptismClearBtn")?.addEventListener("click", () => {
+  document.getElementById("baptismForm").reset();
+  updateBaptismPreview();
+});
+function renderBaptismTable() {
+  const tbody = document.getElementById("baptismTableBody");
+  if (!tbody) return;
+  const records = load("nac_baptism");
+  if (!records.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);">No certificates saved yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = records.map(r => `<tr>
+    <td>${escapeHTML(r.name || "")}</td><td>${r.baptism || "—"}</td>
+    <td>${escapeHTML(r.cong || "—")}</td><td>${escapeHTML(r.certno || "—")}</td>
+    <td class="actions"><button class="btn-sm-view" onclick="viewBaptism(${r.id})">View</button>
+    <button class="btn-sm-del" onclick="deleteBaptism(${r.id})">Del</button></td></tr>`).join("");
+}
+window.viewBaptism = function(id) {
+  const r = load("nac_baptism").find(x => x.id === id); if (!r) return;
+  const values = {b_name:r.name,b_dob:r.dob,b_father:r.father,b_mother:r.mother,b_baptism:r.baptism,b_sealed:r.sealed,b_cong:r.cong,b_certno:r.certno,b_apostle:r.apostle};
+  Object.entries(values).forEach(([k,v]) => { const el=document.getElementById(k); if(el) el.value=v||""; });
+  updateBaptismPreview(); document.querySelector('[data-panel="baptism"]').click();
+};
+window.deleteBaptism = function(id) {
+  if (!confirm("Delete this certificate?")) return;
+  save("nac_baptism", load("nac_baptism").filter(x => x.id !== id)); renderBaptismTable();
+};
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+// ===== ID CARD =====
+function formatDateShort(d) {
+  if (!d) return "—";
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const parts = d.split("-");
+  if (parts.length === 3) {
+    return `${parseInt(parts[2],10)} ${months[parseInt(parts[1],10)-1]} ${parts[0]}`;
+  }
+  return d;
+}
+
+document.getElementById("id_photoFile")?.addEventListener("change", e => {
+  const file = e.target.files[0];
+  fileToDataURL(file, data => {
+    document.getElementById("id_photoData").value = data;
+    const prev = document.getElementById("id_photoPreview");
+    const thumb = document.getElementById("id_photoThumb");
+    if (data) {
+      thumb.src = data;
+      prev.style.display = "block";
+    } else {
+      prev.style.display = "none";
+    }
+    updateIdPreview();
+  });
+});
+
+function updateIdPreview() {
+  document.getElementById("idp_name").textContent = document.getElementById("id_name").value || "—";
+  document.getElementById("idp_memno").textContent = document.getElementById("id_memno").value || "—";
+  document.getElementById("idp_dob").textContent = formatDateShort(document.getElementById("id_dob").value);
+  document.getElementById("idp_cong").textContent = document.getElementById("id_cong").value || "—";
+  document.getElementById("idp_district").textContent = document.getElementById("id_district").value || "—";
+  document.getElementById("idp_issued").textContent = formatDateShort(document.getElementById("id_issued").value);
+  document.getElementById("idp_sealed").textContent = formatDateShort(document.getElementById("id_sealed").value);
+  document.getElementById("idp_expires").textContent = formatDateShort(document.getElementById("id_expires").value);
+  document.getElementById("idp_signatory").textContent = document.getElementById("id_signatory").value || "";
+  document.getElementById("idp_role").textContent = document.getElementById("id_role").value || "MEMBER";
+
+  const photoData = document.getElementById("id_photoData").value;
+  const box = document.getElementById("idp_photoBox");
+  if (photoData) {
+    box.innerHTML = `<img src="${photoData}" alt="Photo">`;
+  } else {
+    box.innerHTML = `<span class="idc-no-photo">Photo</span>`;
+  }
+}
+
+["id_name","id_memno","id_dob","id_cong","id_district","id_issued","id_sealed","id_expires","id_signatory","id_role"].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener("input", updateIdPreview);
+  if (el && el.tagName === "SELECT") el.addEventListener("change", updateIdPreview);
+});
+
+document.getElementById("idPreviewBtn")?.addEventListener("click", updateIdPreview);
+
+document.getElementById("idForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const rec = {
+    id: Date.now(),
+    name: document.getElementById("id_name").value.trim(),
+    memno: document.getElementById("id_memno").value.trim(),
+    dob: document.getElementById("id_dob").value,
+    role: document.getElementById("id_role").value,
+    cong: document.getElementById("id_cong").value.trim(),
+    district: document.getElementById("id_district").value.trim(),
+    issued: document.getElementById("id_issued").value,
+    sealed: document.getElementById("id_sealed").value,
+    expires: document.getElementById("id_expires").value,
+    signatory: document.getElementById("id_signatory").value.trim(),
+    photo: document.getElementById("id_photoData").value || ""
+  };
+  const list = load("nac_idcard");
+  list.unshift(rec);
+  save("nac_idcard", list);
+  renderIdTable();
+  showToast("ID card saved");
+  updateIdPreview();
+});
+
+document.getElementById("idClearBtn").addEventListener("click", () => {
+  document.getElementById("idForm").reset();
+  document.getElementById("id_photoData").value = "";
+  document.getElementById("id_photoPreview").style.display = "none";
+  updateIdPreview();
+});
+
+function renderIdTable(filter = "") {
+  let list = load("nac_idcard");
+  if (filter) {
+    const q = filter.toLowerCase();
+    list = list.filter(r =>
+      (r.name || "").toLowerCase().includes(q) ||
+      (r.memno || "").toLowerCase().includes(q) ||
+      (r.cong || "").toLowerCase().includes(q) ||
+      (r.district || "").toLowerCase().includes(q) ||
+      (r.role || "").toLowerCase().includes(q)
+    );
+  }
+  const tbody = document.getElementById("idTableBody");
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);">No ID cards saved yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(r => `
+    <tr>
+      <td>${r.name}</td>
+      <td>${r.memno || "—"}</td>
+      <td>${r.role || "MEMBER"}</td>
+      <td>${r.cong}</td>
+      <td>${r.district || "—"}</td>
+      <td class="actions">
+        <button class="btn-sm-view" onclick="viewId(${r.id})">View</button>
+        <button class="btn-sm-del" onclick="delId(${r.id})">Del</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+window.viewId = function(id) {
+  const r = load("nac_idcard").find(x => x.id === id);
+  if (!r) return;
+  document.getElementById("id_name").value = r.name || "";
+  document.getElementById("id_memno").value = r.memno || "";
+  document.getElementById("id_dob").value = r.dob || "";
+  document.getElementById("id_role").value = r.role || "MEMBER";
+  document.getElementById("id_cong").value = r.cong || "";
+  document.getElementById("id_district").value = r.district || "";
+  document.getElementById("id_issued").value = r.issued || "";
+  document.getElementById("id_sealed").value = r.sealed || "";
+  document.getElementById("id_expires").value = r.expires || "";
+  document.getElementById("id_signatory").value = r.signatory || "";
+  document.getElementById("id_photoData").value = r.photo || "";
+  const prev = document.getElementById("id_photoPreview");
+  const thumb = document.getElementById("id_photoThumb");
+  if (r.photo) {
+    thumb.src = r.photo;
+    prev.style.display = "block";
+  } else {
+    prev.style.display = "none";
+  }
+  updateIdPreview();
+  document.querySelector('[data-panel="idcard"]').click();
+};
+
+window.delId = function(id) {
+  if (!confirm("Delete this ID card?")) return;
+  save("nac_idcard", load("nac_idcard").filter(x => x.id !== id));
+  renderIdTable(document.getElementById("idSearch")?.value || "");
+  showToast("ID card deleted");
+};
+
+document.getElementById("idSearch")?.addEventListener("input", e => {
+  renderIdTable(e.target.value);
+});
+
+// Share ID card (Web Share API or fallback copy)
+document.getElementById("idShareBtn")?.addEventListener("click", async () => {
+  const name = document.getElementById("id_name").value || "Member";
+  const memno = document.getElementById("id_memno").value || "";
+  const text = `New Apostolic Church Membership Card\\nName: ${name}\\nID: ${memno}\\nCongregation: ${document.getElementById("id_cong").value || ""}`;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: "NAC Membership Card", text });
+    } catch (err) {}
+  } else {
+    await navigator.clipboard.writeText(text);
+    showToast("Card details copied to clipboard");
+  }
+});
+
+
+
+// Print only the selected report summary as a clean, table-based report.
+function printSummaryTable(reportType) {
+  const isApostles = reportType === "apostles";
+  const boxId = isApostles ? "apostleSummaryBox" : "congSummaryBox";
+  const title = isApostles
+    ? "New Apostolic Church — Apostles Reports Summary"
+    : "New Apostolic Church — Congregation Reports Summary";
+  const sourceBox = document.getElementById(boxId);
+  const sourceTable = sourceBox ? sourceBox.querySelector("table") : null;
+
+  if (!sourceTable || !sourceTable.querySelector("tbody tr")) {
+    showToast("No summary table data available to print");
+    return;
+  }
+
+  const printWindow = window.open("", "_blank", "width=1100,height=750");
+  if (!printWindow) {
+    showToast("Please allow pop-ups to print the summary");
+    return;
+  }
+
+  const table = sourceTable.cloneNode(true);
+  table.removeAttribute("style");
+  table.querySelectorAll("th, td").forEach(cell => {
+    cell.removeAttribute("style");
+  });
+
+  printWindow.document.open();
+  printWindow.document.write(`<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <style>
+      @page { size: landscape; margin: 12mm; }
+      body { font-family: Arial, sans-serif; color: #172033; margin: 0; }
+      .report-head { text-align: center; border-bottom: 2px solid #1e5aa8; padding-bottom: 10px; margin-bottom: 18px; }
+      h1 { color: #123d70; font-size: 20px; margin: 0 0 5px; }
+      .subtitle { font-size: 12px; color: #536477; }
+      .printed { text-align: right; font-size: 10px; color: #64748b; margin: 0 0 8px; }
+      table { width: 100%; border-collapse: collapse; font-size: 11px; }
+      thead { display: table-header-group; }
+      tr { page-break-inside: avoid; }
+      th, td { border: 1px solid #64748b; padding: 7px 6px; text-align: left; }
+      th { background: #e8f1fb !important; color: #123d70; font-weight: bold; text-transform: uppercase; }
+      tbody tr:last-child { font-weight: bold; background: #eef5ff !important; }
+      .signatures { display: flex; justify-content: space-between; gap: 35px; margin-top: 45px; font-size: 11px; }
+      .sig { width: 30%; border-top: 1px solid #334155; padding-top: 6px; text-align: center; }
+      @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+    </style>
+  </head>
+  <body>
+    <div class="report-head">
+      <h1>${title}</h1>
+      <div class="subtitle">Monthly and Yearly Statistical Summary</div>
+    </div>
+    <div class="printed">Printed: ${new Date().toLocaleString()}</div>
+    ${table.outerHTML}
+    <div class="signatures">
+      <div class="sig">Prepared By</div>
+      <div class="sig">Checked By</div>
+      <div class="sig">Approved By</div>
+    </div>
+    <script>
+      window.onload = function() {
+        window.focus();
+        window.print();
+      };
+    <\/script>
+  </body>
+  </html>`);
+  printWindow.document.close();
+}
+
+// Share summary helpers
+async function shareText(title, text) {
+  if (!text) {
+    showToast("No summary data to share");
+    return;
+  }
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, text });
+    } catch (e) {}
+  } else {
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast("Summary copied to clipboard");
+    } catch (e) {
+      showToast("Could not share");
+    }
+  }
+}
+
+document.getElementById("congShareSummaryBtn")?.addEventListener("click", () => {
+  shareText("NAC Congregation Reports Summary", window._congSummaryText || "");
+});
+
+document.getElementById("apostleShareSummaryBtn")?.addEventListener("click", () => {
+  shareText("NAC Apostle Reports Summary", window._apostleSummaryText || "");
+});
+
+// ===== INIT =====
+updateCongDashboard();
+updateApostleDashboard();
+renderBaptismTable();
+renderIdTable();
+</script>
+</body>
+</html>
